@@ -1,3 +1,18 @@
+
+# This function is designed to return a tidy dataset comprised of mean data points across
+# a variety of measurments from Human Activity Recognition Using Smartphone Data Set.
+#
+# Data Dictionary:
+# Subject - the test subject wearing the data capture device
+# Activity - an activity being performed by the subject
+# Remaining Columns - the mean of activity measurements captured (see ./UCI HAR Dataset/features_info.txt)
+#
+# Source Dataset:
+# http://archive.ics.uci.edu/ml/datasets/Human+Activity+Recognition+Using+Smartphones
+#
+# Example Usage:
+# data <- run_analysis()
+
 run_analysis <- function(){
         
         # Column Labels
@@ -17,14 +32,16 @@ run_analysis <- function(){
         data_test <- data_test[,c_keep]
         
         activities_test <- read.table("./UCI HAR Dataset/test/y_test.txt")
-        activities_test <- merge(activities_test,act_labels)
-        activities_test <- activities_test[,3]
+        activities_test <- merge(activities_test,act_labels) # Apply friendly activity names
+        activities_test <- activities_test[,3] # Return only friendly activity names
         names(activities_test) <- "activity"
         
         subjects_test <- read.table("./UCI HAR Dataset/test/subject_test.txt")
         names(subjects_test) <- "subject"
         
         data_test <- cbind(subjects_test, activities_test, data_test)
+
+        names(data_test)[2] <- "activity" # Correct activity column name from cbind function
         
         # Data from Train
         data_train <- read.table("./UCI HAR Dataset/train/X_train.txt")
@@ -32,8 +49,8 @@ run_analysis <- function(){
         data_train <- data_train[,c_keep]
         
         activities_train <- read.table("./UCI HAR Dataset/train/y_train.txt")
-        activities_train <- merge(activities_train,act_labels)
-        activities_train <- activities_train[,3]
+        activities_train <- merge(activities_train,act_labels) # Apply friendly activity names
+        activities_train <- activities_train[,3] # Return only friendly activity names
         names(activities_train) <- "activity"
         
         subjects_train <- read.table("./UCI HAR Dataset/train/subject_train.txt")
@@ -41,11 +58,14 @@ run_analysis <- function(){
         
         data_train <- cbind(subjects_train, activities_train, data_train)
         
-        # Merge Data
+        names(data_train)[2] <- "activity" # Correct activity column name from cbind function
+        
+        # Merge Test and Training Dataset
         data <- rbind(data_test, data_train)
         
-        # Fix Naming of Factor Column
-        names(data)[2] <- "activity"
+        # Summarize Data by Subject and Activity
+        tidy <- aggregate(data[,3:68], by=data[c("subject","activity")], FUN=mean, na.rm = TRUE)
         
-        
+        # Return Tidy Dataset
+        tidy
 }
